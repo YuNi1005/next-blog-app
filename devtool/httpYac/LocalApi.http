@@ -1,0 +1,27 @@
+# [Ctrl]+[Alt]+[R] で各セクションを実行
+
+### カテゴリ一覧の取得
+GET http://localhost:3000/api/categories
+
+### カテゴリの作成
+POST http://localhost:3000/api/admin/categories
+Content-Type: application/json
+
+{
+  "name": "カテゴリ6"
+}
+
+### カテゴリの削除
+@post_id = 46562fea-edf7-4d72-9ac3-8add07b38260
+DELETE http://localhost:3000/api/admin/categories/{{post_id}}
+
+### カテゴリの名前を変更
+@post_id = 05400979-05c1-4c14-a477-6ed54013a963
+PUT http://localhost:3000/api/admin/categories/{{post_id}}
+Content-Type: application/json
+
+{
+  "name": "カテゴリA"
+}
+### 投稿記事一覧の取得
+GET http://localhost:3000/api/posts
