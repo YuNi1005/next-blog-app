@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation"; // ◀ 注目
-
+import { useParams } from "next/navigation";
 import type { Post } from "@/app/_types/Post";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";

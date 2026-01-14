@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
+import Filter from "@/app/_components/Filter";
+import Pagination from "@/app/_components/Pagination";
 
 type Category = { id: string; name: string; createdAt?: string };
 
@@ -10,6 +12,7 @@ const Page: React.FC = () => {
   const [categories, setCategories] = useState<Category[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [filtered, setFiltered] = useState<Category[]>([]);
 
   const fetchCategories = async () => {
     setIsLoading(true);
@@ -31,6 +34,10 @@ const Page: React.FC = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (categories) setFiltered(categories);
+  }, [categories]);
 
   const handleDelete = async (c: Category) => {
     if (!confirm(`カテゴリ「${c.name}」を削除しますか？`)) return;
@@ -66,35 +73,48 @@ const Page: React.FC = () => {
         </Link>
       </div>
 
-      {categories.length === 0 ? (
+      <Filter
+        items={categories ?? []}
+        keys={["name"]}
+        onFiltered={setFiltered}
+        placeholder="カテゴリを検索"
+      />
+
+      {categories && categories.length === 0 ? (
         <div className="text-gray-500">
           （カテゴリは1個も作成されていません）
         </div>
       ) : (
-        <div className="space-y-4">
-          {categories.map((c) => (
-            <div
-              key={c.id}
-              className="flex items-center justify-between rounded-md border px-4 py-4"
-            >
-              <div className="text-lg font-medium">{c.name}</div>
-              <div className="flex items-center gap-3">
-                <Link
-                  href={`/admin/categories/${c.id}`}
-                  className="rounded-md bg-violet-500 px-4 py-2 text-white"
+        <Pagination
+          items={filtered}
+          pageSize={10}
+          render={(pageItems) => (
+            <div className="space-y-4">
+              {pageItems.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center justify-between rounded-md border px-4 py-4"
                 >
-                  編集
-                </Link>
-                <button
-                  onClick={() => handleDelete(c)}
-                  className="rounded-md bg-red-500 px-4 py-2 text-white"
-                >
-                  削除
-                </button>
-              </div>
+                  <div className="text-lg font-medium">{c.name}</div>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href={`/admin/categories/${c.id}`}
+                      className="rounded-md bg-violet-500 px-4 py-2 text-white"
+                    >
+                      編集
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(c)}
+                      className="rounded-md bg-red-500 px-4 py-2 text-white"
+                    >
+                      削除
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        />
       )}
     </main>
   );

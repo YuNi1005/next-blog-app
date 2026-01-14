@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Filter from "@/app/_components/Filter";
+import Pagination from "@/app/_components/Pagination";
 
 type Category = { id: string; name: string };
 type Post = {
@@ -15,6 +17,7 @@ type Post = {
 export default function Page() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filteredPosts, setFilteredPosts] = useState<Post[]>([]);
 
   async function load() {
     setLoading(true);
@@ -34,6 +37,10 @@ export default function Page() {
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    setFilteredPosts(posts);
+  }, [posts]);
 
   async function handleDelete(postId: string, title: string) {
     if (!confirm(`「${title}」を削除しますか？`)) return;
@@ -77,94 +84,113 @@ export default function Page() {
       <div style={{ marginTop: 24 }}>
         {loading ? (
           <div>読み込み中...</div>
+        ) : posts.length === 0 ? (
+          <div>投稿はありません</div>
         ) : (
-          posts.map((p) => (
-            <article
-              key={p.id}
-              style={{
-                border: "1px solid #d7dbe0",
-                borderRadius: 4,
-                padding: 20,
-                marginBottom: 20,
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ maxWidth: "75%" }}>
-                <div style={{ color: "#666", marginBottom: 8 }}>
-                  {formatDate(p.createdAt)}
-                </div>
-                <h2 style={{ margin: "4px 0 8px 0" }}>{p.title}</h2>
-                <div
-                  style={{ color: "#333", lineHeight: 1.8 }}
-                  dangerouslySetInnerHTML={{ __html: p.content || "" }}
-                />
-              </div>
+          <>
+            <Filter
+              items={posts}
+              keys={["title"] as (keyof Post)[]}
+              onFiltered={setFilteredPosts}
+              placeholder="タイトルを検索"
+            />
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-end",
-                  gap: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    marginBottom: 8,
-                    flexWrap: "wrap",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  {p.categories?.map((c) => (
-                    <span
-                      key={c.id}
+            <Pagination
+              items={filteredPosts}
+              pageSize={10}
+              render={(pageItems) => (
+                <>
+                  {pageItems.map((p) => (
+                    <article
+                      key={p.id}
                       style={{
-                        border: "1px solid #d1d5db",
-                        padding: "6px 10px",
-                        borderRadius: 9999,
-                        background: "#fff",
-                        color: "#374151",
-                        fontSize: 13,
+                        border: "1px solid #d7dbe0",
+                        borderRadius: 4,
+                        padding: 20,
+                        marginBottom: 20,
+                        display: "flex",
+                        justifyContent: "space-between",
                       }}
                     >
-                      {c.name}
-                    </span>
-                  ))}
-                </div>
+                      <div style={{ maxWidth: "75%" }}>
+                        <div style={{ color: "#666", marginBottom: 8 }}>
+                          {formatDate(p.createdAt)}
+                        </div>
+                        <h2 style={{ margin: "4px 0 8px 0" }}>{p.title}</h2>
+                        <div
+                          style={{ color: "#333", lineHeight: 1.8 }}
+                          dangerouslySetInnerHTML={{ __html: p.content || "" }}
+                        />
+                      </div>
 
-                <div style={{ display: "flex", gap: 12 }}>
-                  <a
-                    href={`/admin/posts/${p.id}`}
-                    style={{
-                      background: "#6c63ff",
-                      color: "#fff",
-                      padding: "8px 18px",
-                      borderRadius: 8,
-                      textDecoration: "none",
-                    }}
-                  >
-                    編集
-                  </a>
-                  <button
-                    onClick={() => handleDelete(p.id, p.title)}
-                    style={{
-                      background: "#ff4d4f",
-                      color: "#fff",
-                      border: "none",
-                      padding: "8px 18px",
-                      borderRadius: 8,
-                      cursor: "pointer",
-                    }}
-                  >
-                    削除
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-end",
+                          gap: 12,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 8,
+                            marginBottom: 8,
+                            flexWrap: "wrap",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          {p.categories?.map((c) => (
+                            <span
+                              key={c.id}
+                              style={{
+                                border: "1px solid #d1d5db",
+                                padding: "6px 10px",
+                                borderRadius: 9999,
+                                background: "#fff",
+                                color: "#374151",
+                                fontSize: 13,
+                              }}
+                            >
+                              {c.name}
+                            </span>
+                          ))}
+                        </div>
+
+                        <div style={{ display: "flex", gap: 12 }}>
+                          <a
+                            href={`/admin/posts/${p.id}`}
+                            style={{
+                              background: "#6c63ff",
+                              color: "#fff",
+                              padding: "8px 18px",
+                              borderRadius: 8,
+                              textDecoration: "none",
+                            }}
+                          >
+                            編集
+                          </a>
+                          <button
+                            onClick={() => handleDelete(p.id, p.title)}
+                            style={{
+                              background: "#ff4d4f",
+                              color: "#fff",
+                              border: "none",
+                              padding: "8px 18px",
+                              borderRadius: 8,
+                              cursor: "pointer",
+                            }}
+                          >
+                            削除
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </>
+              )}
+            />
+          </>
         )}
       </div>
     </main>
